@@ -41,16 +41,19 @@ public class GameOfLifeScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        updateTimer -= Time.deltaTime;
-        pencilRadius += 5 * Time.deltaTime;
-        if (Input.GetKey(KeyCode.Mouse0))
-            mouseClick = true;
-
-        if (updateTimer <= 0.0f)
+        if (Time.time > 17.5)
         {
-            UpdateGameOfLife();
+            updateTimer -= Time.deltaTime;
+            pencilRadius += 7 * Time.deltaTime;
+            if (Input.GetKey(KeyCode.Mouse0))
+                mouseClick = true;
 
-            updateTimer = updateTime;
+            if (updateTimer <= 0.0f)
+            {
+                UpdateGameOfLife();
+
+                updateTimer = updateTime;
+            }
         }
     }
 }
