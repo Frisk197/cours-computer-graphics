@@ -1,0 +1,50 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> Result;
+float MouseX;
+float MouseY;
+bool MouseClick;
+float PencilRadius;
+
+bool IsCellAlive(float4 cell)
+{
+    return cell.r >= 0.2f;
+}
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    int x = id.x;
+    int y = id.y;
+
+    float2 toMouse = float2(MouseX, MouseY) - float2(x, y);
+
+    if (MouseClick && pow(toMouse.x, 2) + pow(toMouse.y * 0.5, 2) <= pow(PencilRadius, 2))
+    {
+        Result[id.xy] = float4(1.0, 1.0, 1.0, 1.0);
+    }
+
+    int neighbors = 0;
+    for (int i = -1; i < 2; ++i)
+    {
+        for (int j = -1; j < 2; ++j)
+        {
+            uint3 neighborCoords = uint3(x+i, y+j, 1);
+            if (IsCellAlive(Result[neighborCoords.xy]))
+                neighbors++;
+        }
+    }
+
+    bool alive = IsCellAlive(Result[id.xy]);
+    if (alive && (neighbors < 2 || neighbors > 3))
+    {
+        Result[id.xy] = float4(0.0, 0.0, 0.0, 1.0);
+    }
+    else if (neighbors == 3)
+    {
+        Result[id.xy] = float4(1.0, 1.0, 1.0, 1.0);
+    }
+}
