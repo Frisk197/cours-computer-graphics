@@ -1,0 +1,85 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+RWTexture2D<float4> sands;
+RWTexture2D<float4> claimGrid;
+
+int width;
+int height;
+float time;
+bool mouseClickedThisFrame;
+float3 mousePosition;
+
+void tryMoveRight(uint3 id)
+{
+    for (int i = 1; i <= 2; ++i)
+    {
+        if (id.x < width-i && sands.Load(float2(id.x+i, id.y-1)).w == 0 && claimGrid.Load(float2(id.x+i, id.y-1)).w == 0)
+        {
+            claimGrid[float2(id.x+i, id.y-1)] = float4(1,1,1,1);
+            claimGrid[id.xy] = float4(-1,-1,-1,-1);
+            return;
+        }
+    }
+}
+
+void tryMoveLeft(uint3 id)
+{
+    for (int i = 1; i <= 2; ++i)
+    {
+        if (id.x > 0+i && sands.Load(float2(id.x-i, id.y-1)).w == 0 && claimGrid.Load(float2(id.x-i, id.y-1)).w == 0)
+        {
+            claimGrid[float2(id.x-i, id.y-1)] = float4(1,1,1,1);
+            claimGrid[id.xy] = float4(-1,-1,-1,-1);
+            return;
+        }
+    }
+}
+
+[numthreads(32,32,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    if (id.y==0)
+        return;
+    
+    if (distance(id.xy, float2(abs(sin(time)) * width, height-50)) <= 30)
+    {
+        sands[id.xy] = float4(1,1,1,1);
+    }
+    
+    if (sands.Load(id.xy).w == 1)
+    {
+        if (sands.Load(float2(id.x, id.y-1)).w == 0 && claimGrid.Load(float2(id.x, id.y-1)).w == 0)
+        {
+            claimGrid[float2(id.x, id.y-1)] = float4(1,1,1,1);
+            claimGrid[id.xy] = float4(-1,-1,-1,-1);
+        } else
+        {
+            if (frac(sin(dot(id,float2(12.9898,78.233)))*43758.5453123) > 0.5)
+            {
+                tryMoveLeft(id);
+            } else
+            {
+                tryMoveRight(id);
+            }
+        }
+        
+    }
+    
+    AllMemoryBarrier();
+    
+    if (claimGrid.Load(id.xy).w == -1)
+    {
+        sands[id.xy] = float4(0,0,0,0);
+        claimGrid[id.xy] = float4(0,0,0,0);
+    }
+    
+    AllMemoryBarrier();
+    
+    if (claimGrid.Load(id.xy).w == 1)
+    {
+        sands[id.xy] = float4(1,1,1,1);
+        claimGrid[id.xy] = float4(0,0,0,0);
+    }
+    
+}
