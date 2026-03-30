@@ -21,9 +21,9 @@ public class GameOfLifeScript : MonoBehaviour
         var mousePos = Input.mousePosition;
         var relativeMousePos = mousePos - textureOrigin;
 
-        shader.SetFloat("MouseX", relativeMousePos.x);
-        shader.SetFloat("MouseY", relativeMousePos.y);
-        shader.SetBool("MouseClick", mouseClick);
+        shader.SetFloat("MouseX", width/2f);
+        shader.SetFloat("MouseY", height/2f);
+        shader.SetBool("MouseClick", true);
         shader.SetFloat("PencilRadius", pencilRadius);
         shader.Dispatch(kernel, 1+ width / 8, 1+ height / 8, 1);
 
