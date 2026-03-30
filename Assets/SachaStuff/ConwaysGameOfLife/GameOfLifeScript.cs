@@ -44,7 +44,7 @@ public class GameOfLifeScript : MonoBehaviour
         if (Time.time > 17.5)
         {
             updateTimer -= Time.deltaTime;
-            pencilRadius += 7 * Time.deltaTime;
+            pencilRadius += 17 * Time.deltaTime;
             if (Input.GetKey(KeyCode.Mouse0))
                 mouseClick = true;
 
